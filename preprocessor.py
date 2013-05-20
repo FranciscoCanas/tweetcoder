@@ -4,7 +4,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 
 
-if "__name__"=="__main__":
+if __name__=="__main__":
 	if sys.argv>2:
 		print "Useage: python preprocessor <tweetfile> <outputfile>"
 		sys.exit()
