@@ -1,0 +1,3 @@
+Here we are testing the natural language processing capabilities of the nltk library. Furthermore, we will be testing any custom-defined functions written in order to pre-process the large body of tweet texts collected over the course of two weeks from the top trending searches available on through the twitter api.
+
+This particular document is simply a short body of text used for testing the above.
