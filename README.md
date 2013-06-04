@@ -7,6 +7,8 @@ Sasa Milics
 
 Dependencies: 
 NLTK python lib -- www.nltk.org
+Install with:
+pip install nltk
 
 A twitter trends visualization device using neural network auto-encoders!
 
