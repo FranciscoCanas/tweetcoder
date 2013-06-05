@@ -4,7 +4,7 @@ from preprocessor import *
 
 if __name__=="__main__":
 	print os.getcwd()
-	test_file = open('../dumps/texts','r')
+	test_file = open('../dumps/500texts','r')
 	all_words = construct_all_words(test_file)
 	n = len(all_words)
 	print str(n) + " unique words found: "
@@ -18,8 +18,8 @@ if __name__=="__main__":
 	print str(corpus_dict)
 	test_file.close()
 
-	tweet_file = open('../dumps/texts','r')
-	out_file = open('../dumps/bag_vectorized','w')
+	tweet_file = open('../dumps/500texts','r')
+	out_file = open('../dumps/500bag_vectorized','w')
 	bag = vectorize_bag_of_words(tweet_file,out_file,corpus_dict)
 	tweet_file.close()
 	out_file.close()
