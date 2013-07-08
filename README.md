@@ -4,7 +4,7 @@ tweetcoder
 - Francisco Canas
 - Sasa Milics
 
- What be this?
+What be this?
 --------------
 A very work-in-progress twitter trends visualization device using autoencoders.
 
