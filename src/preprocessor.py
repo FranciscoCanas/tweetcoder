@@ -1,3 +1,4 @@
+import cPickle
 import sys
 import nltk
 from nltk.corpus import stopwords
@@ -12,8 +13,9 @@ def construct_all_words(input_file):
 	a list of all unique words.
 	'''
 	tokenizer = RegexpTokenizer(r'\w+')
+	with open(input_file, 'r') as input:
+		body = tokenizer.tokenize(input.read())
 
-	body = tokenizer.tokenize(input_file.read())
 	all_words = nltk.FreqDist(w.lower() for w in body)
 	return all_words.keys()
 
@@ -51,22 +53,32 @@ def bag_of_words(body, corpus):
 	return [freq[word] for word in corpus]
 
 
-def vectorize_bag_of_words(infile, outfile, corpus):
+def vectorize_bag_of_words(infile, target_file, corpus):
 	'''
 	Takes a file containing bodies of text separated by a
 	line return. 
 	Uses the "bag of words" technique to vectorize each body
 	of txt in the input_file. 
-	Ouputs vectors to text file.
+	Dumps pickled vectors to target_file.
 	'''
 	count = 0
 	if VERBOSE:
 		print "Vectorizing:"
-	for body in infile:
-		count += 1
-		outfile.write(str(bag_of_words(body, corpus)) + '\n')
-		if VERBOSE:
-			sys.stdout.write('.')
+	
+	out = []
+	with open(infile, 'r') as input:	
+		for body in input:
+			count += 1
+			out.append(bag_of_words(body,corpus))
+			#outfile.write(str(bag_of_words(body, corpus)) + '\n')
+			if VERBOSE:
+				sys.stdout.write('.')
+	
+	# open the target file and dump that pickle
+	print target_file
+	with open(target_file, 'wb') as of:
+		cPickle.dump(out,of)
+		
 	if VERBOSE:
 		print
 		print "Vectorized {} text bodies.".format(count)
@@ -107,21 +119,17 @@ if __name__=="__main__":
 	VERBOSE = args.verbose
 
 	
-	dictfile = open(args.dictfile,'r')
-	all_words=construct_all_words(dictfile)
+	
+	all_words=construct_all_words(args.dictfile)
 	N = len(all_words)
 	if VERBOSE:
 		print "Found {} unique words.".format(N)
 
 	corpus_list = construct_corpus_list(all_words,args.dictsize)
-	dictfile.close()
-
-	infile = open(args.inputfile,'r')
-	outfile = open(args.outputfile,'w')
+	
 	if (args.output=="char"):
-		vectorize_percharacter(infile, outfile, corpus_list)
+		vectorize_percharacter(args.inputfile, args.outputfile, corpus_list)
 	else:
-		vectorize_bag_of_words(infile, outfile, corpus_list)
+		vectorize_bag_of_words(args.inputfile, args.outputfile, corpus_list)
 
-	infile.close()
-	outfile.close()
+	
