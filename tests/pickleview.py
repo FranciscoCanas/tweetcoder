@@ -13,5 +13,6 @@ if __name__=="__main__":
     with open(args.thefile, 'rb') as input:
         x = cPickle.load(input)
         
-    print x
+    for guy in x:
+        print guy
 

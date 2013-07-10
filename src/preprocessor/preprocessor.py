@@ -2,15 +2,18 @@ import cPickle
 import sys
 import nltk
 from nltk.corpus import stopwords
+from nltk.corpus import words
 from nltk.tokenize import RegexpTokenizer
 import argparse
 
 VERBOSE=False
+LANG='english'
+SIZE = 2000
 
 def construct_all_words(input_file):
 	'''
 	Given some input file containing a body of text, constructs 
-	a list of all unique words.
+	a frequency distribution list of all unique words.
 	'''
 	tokenizer = RegexpTokenizer(r'\w+')
 	with open(input_file, 'r') as input:
@@ -19,38 +22,44 @@ def construct_all_words(input_file):
 	all_words = nltk.FreqDist(w.lower() for w in body)
 	return all_words.keys()
 
-def construct_corpus_list(word_list, size=2000):
+def construct_dict_list(word_freq,size=SIZE):
 	'''
-	Given some input file containing a body of text, contructs
+	Given a freq dist of words in list form, contructs
 	a dictionary (list, actually ) of the  most-frequently used 
 	words containing 'size' number of entries.
 	Removes stopwords by default.
 	'''
 	if VERBOSE:
-		print "Constructing Corpus Dictionary:"
+		print "Constructing Dictionary:"
+		
 	non_stop_words = []
-	for w in word_list:
+	for w in word_freq:
 		if VERBOSE:
 			sys.stdout.write('.')
-		if w not in stopwords.words('english'):
+		if w not in stopwords.words(LANG):
 			non_stop_words.append(w)
-	corpus_list = non_stop_words[:size]
+	dict_list = non_stop_words[:size]
 	if VERBOSE:
 		sys.stdout.write('\n')
 
 	if VERBOSE:
 		print "Corpus Dictionary:"
-		print corpus_list
-	return corpus_list
+		print dict_list
+	return dict_list
 
 
-def bag_of_words(body, corpus):
+def bag_of_words(body, dictionary):
 	'''
-	Return a list of the frequency of the words from corpus found
+	Return a list of the frequency of the words from dictionary found
 	in body.
 	'''
+	
 	freq = nltk.FreqDist(body)
-	return [freq[word] for word in corpus]
+	vec = [freq[word] for word in dictionary]
+	if VERBOSE:
+		print vec
+	
+	return vec
 
 
 def vectorize_bag_of_words(infile, target_file, corpus):
@@ -70,7 +79,7 @@ def vectorize_bag_of_words(infile, target_file, corpus):
 		for body in input:
 			count += 1
 			out.append(bag_of_words(body,corpus))
-			#outfile.write(str(bag_of_words(body, corpus)) + '\n')
+			
 			if VERBOSE:
 				sys.stdout.write('.')
 	
@@ -107,17 +116,22 @@ if __name__=="__main__":
 		help="The type of vectorization to use: [bag] of words, or per-[char]acter.")
 	parser.add_argument("-d", "--dictsize", default=200, type=int,
 		help="Length of output vectors and corpus dictionary.")
+	parser.add_argument("-l", "--lang", choices=["english","spanish"],
+					default="english",
+					help="Language: english|spanish")
 	parser.add_argument("inputfile",
 		help="File containing line-separated text bodies.")
 	parser.add_argument("outputfile",
 		help="A path to the output file.")
 	parser.add_argument("dictfile",
+		default=None,
 		help="A file containing the body of text to construct corpus dictionary from.")
-
+	
 	args=parser.parse_args()
 
 	VERBOSE = args.verbose
-
+	LANG = args.lang
+	SIZE = args.dictsize
 	
 	
 	all_words=construct_all_words(args.dictfile)
@@ -125,11 +139,11 @@ if __name__=="__main__":
 	if VERBOSE:
 		print "Found {} unique words.".format(N)
 
-	corpus_list = construct_corpus_list(all_words,args.dictsize)
+	dict_list = construct_dict_list(all_words)
 	
 	if (args.output=="char"):
-		vectorize_percharacter(args.inputfile, args.outputfile, corpus_list)
+		vectorize_percharacter(args.inputfile, args.outputfile, dict_list)
 	else:
-		vectorize_bag_of_words(args.inputfile, args.outputfile, corpus_list)
+		vectorize_bag_of_words(args.inputfile, args.outputfile, dict_list)
 
 	
