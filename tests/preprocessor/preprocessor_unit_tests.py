@@ -14,7 +14,11 @@ class preprocessor_unit_tests(unittest.TestCase):
 		Any code to run before each test.
 		"""
 		self.word_list = ["a","b","c","d","e","a","c","a","e", "f","f"]
-		self.word_freq = nltk.FreqDist(self.word_list)	
+		self.word_freq = nltk.FreqDist(self.word_list)
+		
+		self.w2 = ["cows","monsters","eat","the","terrible","coffee","table","cows",
+				"cows","sandwich","sandwich","the","terrible","television","cars"]	
+		self.wf2 = nltk.FreqDist(self.w2)
 		return
 	
 	def test_construct_all_words(self):
@@ -56,6 +60,9 @@ class preprocessor_unit_tests(unittest.TestCase):
 		assert "c" in dict_list
 		assert "e" in dict_list
 		assert "f" in dict_list
+		
+		print construct_dict_list(self.wf2,4)
+		
 		return
 	
 	def test_stemmer(self):

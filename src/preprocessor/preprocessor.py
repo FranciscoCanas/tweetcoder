@@ -24,7 +24,7 @@ def construct_all_words(input_file):
 	all_words = nltk.FreqDist(w.lower() for w in body)
 	return all_words.keys()
 
-def construct_dict_list(word_freq,size=SIZE):
+def construct_dict_list(word_freq,SIZE):
 	'''
 	Given a freq dist of words in list form, contructs
 	a dictionary (list, actually ) of the  most-frequently used 
@@ -35,12 +35,13 @@ def construct_dict_list(word_freq,size=SIZE):
 		print "Constructing Dictionary:"
 		
 	non_stop_words = []
+
 	for w in word_freq:
 		if VERBOSE:
 			sys.stdout.write('.')
 		if w not in stopwords.words(LANG):
 			non_stop_words.append(w)
-	dict_list = non_stop_words[:size]
+	dict_list = non_stop_words[:SIZE]
 	if VERBOSE:
 		sys.stdout.write('\n')
 
@@ -54,12 +55,15 @@ def bag_of_words(body, dictionary):
 	'''
 	Return a list of the frequency of the words from dictionary found
 	in body.
-	'''
-	
+	''' 
 	# stem the words first:
 	body = word_stemmer(body)
 	
+	# get a frequency distribution for this body of words
 	freq = nltk.FreqDist(body)
+
+	# for each word in body, the frequency that the word appears
+	# if and only if that word is also in the dict 
 	vec = [freq[word] for word in dictionary]
 	if VERBOSE:
 		print vec
@@ -67,7 +71,7 @@ def bag_of_words(body, dictionary):
 	return vec
 
 
-def vectorize_bag_of_words(infile, target_file, corpus):
+def vectorize_bag_of_words(infile, target_file, dictionary):
 	'''
 	Takes a file containing bodies of text separated by a
 	line return. 
@@ -83,7 +87,8 @@ def vectorize_bag_of_words(infile, target_file, corpus):
 	with open(infile, 'r') as input:	
 		for body in input:
 			count += 1
-			out.append(bag_of_words(body,corpus))
+			body = word_list(body)
+			out.append(bag_of_words(body,dictionary))
 			
 			if VERBOSE:
 				sys.stdout.write('.')
@@ -104,12 +109,19 @@ def word_stemmer(word_list):
 	words' stems.
 	'''
 	stemmer = nltk.PorterStemmer()
-	if VERBOSE:
-		print "Stemming text"
 	stemmed_word_set = set(map(stemmer.stem, word_list))
 	stemmed_word_list = list(stemmed_word_set)
 	
 	return stemmed_word_list
+
+def word_list(body):
+	'''
+	Given a body of text as a string, constructs a list
+	of words from it.
+	'''
+	tokenizer = RegexpTokenizer(r'\w+')
+	return tokenizer.tokenize(body)
+	
 
 def vectorize_percharacter(infile, outfile, vector_length):
 	'''
@@ -156,8 +168,9 @@ if __name__=="__main__":
 	if VERBOSE:
 		print "Found {} unique words.".format(N)
 
-	dict_list = construct_dict_list(all_words, SIZE)
-
+	dict_list = construct_dict_list(all_words,SIZE)
+	print dict_list
+	
 	if (args.output=="char"):
 		vectorize_percharacter(args.inputfile, args.outputfile, dict_list)
 	else:
