@@ -13,12 +13,14 @@ SIZE = 2000
 def construct_all_words(input_file):
 	'''
 	Given some input file containing a body of text, constructs 
-	a frequency distribution list of all unique words.
+	a frequency distribution list of all stemmed and unique words.
 	'''
 	tokenizer = RegexpTokenizer(r'\w+')
 	with open(input_file, 'r') as input:
 		body = tokenizer.tokenize(input.read())
 
+	# Stem the body of words first:
+	body = word_stemmer(body)
 	all_words = nltk.FreqDist(w.lower() for w in body)
 	return all_words.keys()
 
@@ -53,6 +55,9 @@ def bag_of_words(body, dictionary):
 	Return a list of the frequency of the words from dictionary found
 	in body.
 	'''
+	
+	# stem the words first:
+	body = word_stemmer(body)
 	
 	freq = nltk.FreqDist(body)
 	vec = [freq[word] for word in dictionary]
@@ -93,6 +98,18 @@ def vectorize_bag_of_words(infile, target_file, corpus):
 		print "Vectorized {} text bodies.".format(count)
 		
 
+def word_stemmer(word_list):
+	'''
+	Takes a list of words as input, returns a list of the
+	words' stems.
+	'''
+	stemmer = nltk.PorterStemmer()
+	if VERBOSE:
+		print "Stemming text"
+	stemmed_word_set = set(map(stemmer.stem, word_list))
+	stemmed_word_list = list(stemmed_word_set)
+	
+	return stemmed_word_list
 
 def vectorize_percharacter(infile, outfile, vector_length):
 	'''
@@ -100,7 +117,7 @@ def vectorize_percharacter(infile, outfile, vector_length):
 	line return. 
 	The output vector represents the type of character found at
 	each position in the body of text. 
-	Ouputs vectors to text file.
+	Outputs vectors to text file.
 	'''	
 	return 
 
@@ -139,8 +156,8 @@ if __name__=="__main__":
 	if VERBOSE:
 		print "Found {} unique words.".format(N)
 
-	dict_list = construct_dict_list(all_words)
-	
+	dict_list = construct_dict_list(all_words, SIZE)
+
 	if (args.output=="char"):
 		vectorize_percharacter(args.inputfile, args.outputfile, dict_list)
 	else:
